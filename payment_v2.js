@@ -4,10 +4,7 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
     // Set the option's unique ID as it is configured on the Payment Provider so they can be related at the checkout.
     id: "2218102"
   
-    // This parameter renders the billing information form and requires the information to the consumer.
-    fields: {
-      billing_address: true
-    },
+ 
 
     // This function handles the order submission event.
     onSubmit: function (callback) {
