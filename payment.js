@@ -2,7 +2,7 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
   // Create a new instance of external Payment Option and set its properties.
   var AcmeExternalPaymentOption = PaymentOptions.ExternalPayment({
     // Set the option's unique ID as it is configured on the Payment Provider so they can be related at the checkout.
-    id: "acme_redirect",
+    id: "2218102",
 
     console.log("TESTE -->  " , Checkout.getData("order.cart.prices.total"))
   
