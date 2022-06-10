@@ -3,8 +3,6 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
   var AcmeExternalPaymentOption = PaymentOptions.ExternalPayment({
     // Set the option's unique ID as it is configured on the Payment Provider so they can be related at the checkout.
     id: "2218102"
-
-    console.log("TESTE -->  " , Checkout.getData("order.cart.prices.total"))
   
     // This parameter renders the billing information form and requires the information to the consumer.
     fields: {
