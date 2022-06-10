@@ -22,7 +22,6 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
       });
     }
   });
-
   // Finally, add the Payment Option to the Checkout object so it can be render according to the configuration set on the Payment Provider.
   Checkout.addPaymentOption(AcmeExternalPaymentOption);
 });
