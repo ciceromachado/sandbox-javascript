@@ -1,39 +1,83 @@
 LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
-  // Create a new instance of external Payment Option and set its properties.
-  var AcmeExternalPaymentOption = PaymentOptions.ExternalPayment({
-    // Set the option's unique ID as it is configured on the Payment Provider so they can be related at the checkout.
-    id: "acme_redirect",
+  var currentTotalPrice = Checkout.getData("order.cart.prices.total");
+  var currencCardBin = null;
 
-    // This parameter renders the billing information form and requires the information to the consumer.
-    fields: {
-      billing_address: true,
-    },
+  // Some helper functions.
 
-    // This function handles the order submission event.
+  // Get credit the card number from transparent form.
+  var getCardNumber = function () {
+    return Checkout.getData("form.cardNumber");
+  };
+
+  // Get the first 6 digits from the credit card number.
+  var getCardNumberBin = function () {
+    return getCardNumber().substring(0, 6);
+  };
+
+  // Check whether the BIN (first 6 digits of the credit card number) has changed. If so, we intend to update the available installments.
+  var mustRefreshInstallments = function () {
+    var cardBin = getCardNumberBin();
+    var hasCardBin = cardBin && cardBin.length >= 6;
+    var hasPrice = Boolean(Checkout.getData("totalPrice"));
+    var changedCardBin = cardBin !== currencCardBin;
+    var changedPrice = Checkout.getData("totalPrice") !== currentTotalPrice;
+    return hasCardBin && hasPrice && (changedCardBin || changedPrice);
+  };
+
+  // Update the list of installments available to the consumer.
+  var refreshInstallments = function () {
+    // Let's imagine the App provides this endpoint to obtain installments.
+
+    Checkout.http
+      .post("https://acmepayments.com/card/installments", {
+        amount: Checkout.getData("totalPrice"),
+        bin: getCardNumberBin(),
+      })
+      .then(function (response) {
+        Checkout.setInstallments(response.data.installments);
+      });
+  };
+
+  // Create a new instance of card Payment Option and set its properties.
+  var AcmeCardPaymentOption = PaymentOptions.Transparent.CardPayment({
+    // Set the option's unique ID as it is configured on the Payment Provider so then can be related at the checkout.
+    id: "acme_transparent_card",
+
+    // Event handler for form field input.
+    onDataChange: Checkout.utils.throttle(function () {
+      if (mustRefreshInstallments()) {
+        refreshInstallments();
+      } else if (!getCardNumberBin()) {
+        // Clear installments if customer remove credit card number.
+        Checkout.setInstallments(null);
+      }
+    }),
+
     onSubmit: function (callback) {
-      // Gather the minimum required information. You should include all the relevant data here.
-      let acmeRelevantData = {
+      // Gather the minimum required information.
+      var acmeCardRelevantData = {
         orderId: Checkout.getData("order.cart.id"),
         currency: Checkout.getData("order.cart.currency"),
         total: Checkout.getData("order.cart.prices.total"),
+        card: {
+          number: Checkout.getData("form.cardNumber"),
+          name: Checkout.getData("form.cardHolderName"),
+          expiration: Checkout.getData("form.cardExpiration"),
+          cvv: Checkout.getData("form.cardCvv"),
+          installments: Checkout.getData("form.cardInstallments"),
+        },
       };
-
-      // Use the Checkout HTTP library to post a request to our server and fetch the redirect URL.
+      // Let's imagine the App provides this endpoint to process credit card payments.
       Checkout.http
-        .post("https://62a39c9d21232ff9b2230e1e.mockapi.io/api/v1/payment", {
-          data: acmeRelevantData,
-        })
+        .post("https://acmepayments.com/charge", acmeCardRelevantData)
         .then(function (responseBody) {
-           console.log(responseBody)
-          // Once the redirect URL is generated, invoke the callback by passing it as argument.
           if (responseBody.data.success) {
+            // If the transaction was successful, invoke the callback to indicate you want to close order.
             callback({
               success: true,
-              redirect: responseBody.data.redirect_url,
-              extraAuthorize: true, // Legacy paameter, but currently required with `true` value. Will be deprecrated soon.
             });
           } else {
-          // If the generation of the redirect URL fails, invoke the callback indicating the corresponding error code. E.g.: `consumer_country_invalid`. See the list of available error codes.
+            // If the transaction fails, invoke the callback indicating the corresponding error code. E.g.: `card_rejected_insufficient_funds`. See the list of available error codes.
             callback({
               success: false,
               error_code: responseBody.data.error_code,
@@ -52,5 +96,5 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
   });
 
   // Finally, add the Payment Option to the Checkout object so it can be render according to the configuration set on the Payment Provider.
-  Checkout.addPaymentOption(AcmeExternalPaymentOption);
+  Checkout.addPaymentOption(AcmeCardPaymentOption);
 });
