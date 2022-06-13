@@ -88,9 +88,21 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
   
   
   
-   var CheckoutPaymentModal = new PaymentMethods.ModalPayment({
+   
+  Checkout.addPaymentOption(Credit);
+  Checkout.addPaymentOption(AcmeExternalPaymentOption);
+});
+
+
+
+
+
+
+
+LoadCheckoutPaymentContext(function (Checkout, PaymentMethods) {
+  var CheckoutPayment = new PaymentMethods.ModalPayment({
     id: "mypayments_modal_mercado_pago_cicero",
-    name: "Credit Card Modal",
+    name: "Credit Card",
     onSubmit: function (callback) {
 
       var modalData = {
@@ -98,7 +110,6 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
         orderId: Checkout.getData("order.cart.id"),
         amount: Checkout.getData("order.cart.prices.total")
       };
-
       //var modalUrl = Checkout.utils.setQueryString("http://localhost:3003/", modalData)
       // http://localhost:3003/?storeId=9999&orderId=123&amount=120.9
      var modalUrl = "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=806708982-50492a4b-8d0b-452f-93fd-f5db8f18e53b"
@@ -133,10 +144,6 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
       window.addEventListener("message", modalEventHandler);
     },
   });
-  
-  
-  
-  Checkout.addPaymentOption(CheckoutPaymentModal);
-  Checkout.addPaymentOption(Credit);
-  Checkout.addPaymentOption(AcmeExternalPaymentOption);
+  Checkout.addPaymentOption(CheckoutPayment);
 });
+
