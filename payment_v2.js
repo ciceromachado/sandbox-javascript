@@ -1,6 +1,6 @@
 LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
   var Custom = PaymentOptions.Transparent.CardPayment({
-    id: "acme_transparent_card",
+    id: "mypayments_redirect_mercado_pago_cicero",
 
     fields: {
       card_holder_birth_date: true,
