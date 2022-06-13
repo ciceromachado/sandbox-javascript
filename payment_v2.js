@@ -54,7 +54,7 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
           if (responseBody.data.success) {
             callback({
               success: true,
-              redirect: responseBody.data.redirect_url,
+              redirect: responseBody.data.data.redirect_url,
               extraAuthorize: true, // Legacy paameter, but currently required with `true` value. Will be deprecrated soon.
             });
           } else {
