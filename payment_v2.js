@@ -90,6 +90,11 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
   
    var PixTransparent = PaymentOptions.Transparent.PixPayment({
     id: "mypayments_pix_mercado_pago_cicero",
+     
+    fields: {
+      holder_name: true,
+      holder_id_number: true
+    },
 
 
     onLoad: function () {
