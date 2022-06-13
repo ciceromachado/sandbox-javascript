@@ -51,7 +51,7 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
         .then(function (responseBody) {
            console.log(responseBody)
           // Once the redirect URL is generated, invoke the callback by passing it as argument.
-          if (responseBody.data.success) {
+          if (responseBody.data.data.success) {
             callback({
               success: true,
               redirect: responseBody.data.data.redirect_url,
