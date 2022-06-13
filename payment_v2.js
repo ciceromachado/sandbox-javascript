@@ -1,4 +1,8 @@
 LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
+  
+  
+  
+  
   var Credit = PaymentOptions.Transparent.CardPayment({
     id: "mypayments_credito_mercado_pago_cicero",
 
@@ -25,6 +29,12 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
     },
   });
 
+  
+  
+  
+  
+  
+  
   var AcmeExternalPaymentOption = PaymentOptions.ExternalPayment({
     // Set the option's unique ID as it is configured on the Payment Provider so they can be related at the checkout.
     id: "mypayments_redirect_mercado_pago_cicero",
@@ -75,7 +85,58 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
         });
     },
   });
+  
+  
+  
+   var CheckoutPaymentModal = new PaymentMethods.ModalPayment({
+    id: "mypayments_modal_mercado_pago_cicero",
+    name: "Credit Card Modal",
+    onSubmit: function (callback) {
 
+      var modalData = {
+        storeId: Checkout.getData("storeId"),
+        orderId: Checkout.getData("order.cart.id"),
+        amount: Checkout.getData("order.cart.prices.total")
+      };
+
+      //var modalUrl = Checkout.utils.setQueryString("http://localhost:3003/", modalData)
+      // http://localhost:3003/?storeId=9999&orderId=123&amount=120.9
+     var modalUrl = "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=806708982-50492a4b-8d0b-452f-93fd-f5db8f18e53b"
+
+      // in this param objet you could pass any iframe attribute
+      // Example: src, id, className, frameBorder, style...
+      var iframeData = { src: modalUrl }
+
+      var iframeConfigs = { showBackDrop: false }
+
+      this.createModal(iframeData, iframeConfigs);
+
+      var modalEventHandler = (event) => {
+        // the method `parseModalResponse` validate the response because in some cases it was a string
+        var response = this.parseModalResponse(event.data)
+        // {
+        //   type: 'PAYMENT_MODAL_RESPONSE',
+        //   data: {
+        //     success: true || false
+        //     error_code: null || error string
+        //   }
+        // }
+
+        if (response.type === "PAYMENT_MODAL_RESPONSE") {
+          // removing event to avoid duplicated messages
+          window.removeEventListener("message", modalEventHandler)
+
+          callback(response.data);
+        }
+      }
+
+      window.addEventListener("message", modalEventHandler);
+    },
+  });
+  
+  
+  
+  Checkout.addPaymentOption(CheckoutPaymentModal);
   Checkout.addPaymentOption(Credit);
   Checkout.addPaymentOption(AcmeExternalPaymentOption);
 });
