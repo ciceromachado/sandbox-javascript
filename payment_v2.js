@@ -23,8 +23,39 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
 
     onSubmit: function (callback) {
       // Do something when user submits the payment.
+      
+              let acmeRelevantData = {
+          orderId: Checkout.getData("order.cart.id"),
+          currency: Checkout.getData("order.cart.currency"),
+          total: Checkout.getData("order.cart.prices.total"),
+        };
+
+        Checkout.http
+        .post("https://httpbin.org/anything", {
+          data: acmeRelevantData,
+        })
+        .then(function (responseBody) {
+           console.log(responseBody)
+          
+          
+          callback({
+            success: false,
+            error_code: "payment_processing_error",
+          });
+          
+        })
+        .catch(function (error) {
+          // Handle a potential error in the HTTP request.
+
+          callback({
+            success: false,
+            error_code: "payment_processing_error",
+          });
+        });
+      
+      
       callback({
-        success: true, // Or false.
+        success: false, // Or false.
       });
     },
   });
