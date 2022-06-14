@@ -31,7 +31,7 @@ LoadCheckoutPaymentContext(function (Checkout, PaymentOptions) {
         };
 
         Checkout.http
-        .post("https://httpbin.org/anything", {
+        .post("https://httpbin.org/user-agent", {
           data: acmeRelevantData,
         })
         .then(function (responseBody) {
